@@ -13,7 +13,7 @@ namespace WindowsFormsApp0328_Part2
     public partial class Form1 : Form
     {
         IFactory FigureFactory { get; set; }
-        
+
         public Form1()
         {
             InitializeComponent();
@@ -22,6 +22,8 @@ namespace WindowsFormsApp0328_Part2
             List<string> figures = new List<string> { "Rectangle", "Circle", "Triangle" };
             FigureCmbbx.Items.AddRange(figures.ToArray());
             FigureCmbbx.SelectedIndex = 0;
+
+
         }
 
         private void FigureCmbbx_SelectedIndexChanged(object sender, EventArgs e)
@@ -47,13 +49,65 @@ namespace WindowsFormsApp0328_Part2
 
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (FigureFactory.GetFigure() is Rectangle rectangle)
+            if (AutomaticRdbtn.Checked)
             {
-                rectangle.Point = e.Location;
-                rectangle.Size = new Size(int.Parse(WidthTxtb.Text), int.Parse(HeightTxtb.Text));
-                rectangle.Color = FigureColor;
-                rectangle.isFilled = true;
-                Figures.Add(rectangle);
+                if (FigureFactory.GetFigure() is Rectangle rectangle)
+                {
+                    rectangle.Point = e.Location;
+                    rectangle.Size = new Size(int.Parse(WidthTxtb.Text), int.Parse(HeightTxtb.Text));
+                    rectangle.Color = FigureColor;
+                    if (FillRdbtn.Checked) rectangle.isFilled = true;
+                    else if (EmptyRdbtn.Checked) rectangle.isFilled = false;
+                    Figures.Add(rectangle);
+                }
+                else if (FigureFactory.GetFigure() is Circle circle)
+                {
+                    circle.Point = e.Location;
+                    circle.Size = new Size(int.Parse(WidthTxtb.Text), int.Parse(HeightTxtb.Text));
+                    circle.Color = FigureColor;
+                    if (FillRdbtn.Checked) circle.isFilled = true;
+                    else if (EmptyRdbtn.Checked) circle.isFilled = false;
+                    Figures.Add(circle);
+                }
+                else if (FigureFactory.GetFigure() is Triangle triangle)
+                {
+                    triangle.Point = e.Location;
+                    triangle.Size = new Size(int.Parse(WidthTxtb.Text), int.Parse(HeightTxtb.Text));
+                    triangle.Color = FigureColor;
+                    if (FillRdbtn.Checked) triangle.isFilled = true;
+                    else if (EmptyRdbtn.Checked) triangle.isFilled = false;
+                    Figures.Add(triangle);
+                }
+            }
+            else if (ManualRdbtn.Checked)
+            {
+                if (FigureFactory.GetFigure() is Rectangle rectangle)
+                {
+                    rectangle.Point = startLocation;
+                    rectangle.Size = new Size(endLocation.X - startLocation.X, endLocation.Y - startLocation.Y);
+                    rectangle.Color = FigureColor;
+                    if (FillRdbtn.Checked) rectangle.isFilled = true;
+                    else if (EmptyRdbtn.Checked) rectangle.isFilled = false;
+                    Figures.Add(rectangle);
+                }
+                else if (FigureFactory.GetFigure() is Circle circle)
+                {
+                    circle.Point = startLocation;
+                    circle.Size = new Size(endLocation.X - startLocation.X, endLocation.Y - startLocation.Y);
+                    circle.Color = FigureColor;
+                    if (FillRdbtn.Checked) circle.isFilled = true;
+                    else if (EmptyRdbtn.Checked) circle.isFilled = false;
+                    Figures.Add(circle);
+                }
+                else if (FigureFactory.GetFigure() is Triangle triangle)
+                {
+                    triangle.Point = startLocation;
+                    triangle.Size = new Size(endLocation.X - startLocation.X, endLocation.Y - startLocation.Y);
+                    triangle.Color = FigureColor;
+                    if (FillRdbtn.Checked) triangle.isFilled = true;
+                    else if (EmptyRdbtn.Checked) triangle.isFilled = false;
+                    Figures.Add(triangle);
+                }
             }
             this.Refresh();
         }
@@ -69,7 +123,23 @@ namespace WindowsFormsApp0328_Part2
                     if (item is Rectangle rectangle)
                     {
                         if (rectangle.isFilled) a.FillRectangle(solidBrush, rectangle.Point.X, rectangle.Point.Y, rectangle.Size.Width, rectangle.Size.Height);
-                        else a.DrawRectangle(pen, rectangle.Point.X, rectangle.Point.Y, rectangle.Size.Width, rectangle.Size.Height);
+                        else if (!rectangle.isFilled) a.DrawRectangle(pen, rectangle.Point.X, rectangle.Point.Y, rectangle.Size.Width, rectangle.Size.Height);
+                    }
+                    else if (item is Circle circle)
+                    {
+                        if (circle.isFilled) a.FillEllipse(solidBrush, circle.Point.X, circle.Point.Y, circle.Size.Width, circle.Size.Height);
+                        else if (!circle.isFilled) a.DrawEllipse(pen, circle.Point.X, circle.Point.Y, circle.Size.Width, circle.Size.Height);
+                    }
+                    else if (item is Triangle triangle)
+                    {
+                        Point[] points = new Point[3]
+                        {
+                            new Point(triangle.Point.X,triangle.Point.Y),
+                            new Point(triangle.Point.X+triangle.Size.Width/2,triangle.Point.Y+triangle.Size.Height),
+                            new Point(triangle.Point.X-triangle.Size.Width/2,triangle.Point.Y+triangle.Size.Height)
+                        };
+                        if (triangle.isFilled) a.FillPolygon(solidBrush, points);
+                        else if (!triangle.isFilled) a.DrawPolygon(pen, points);
                     }
                 }
             }
@@ -81,6 +151,21 @@ namespace WindowsFormsApp0328_Part2
             ColorDialog colorDialog = new ColorDialog();
             var result = colorDialog.ShowDialog();
             if (result == DialogResult.OK) FigureColor = colorDialog.Color;
+        }
+
+
+
+        Point startLocation, endLocation;
+
+        private void Form1_MouseUp(object sender, MouseEventArgs e)
+        {
+            endLocation = e.Location;
+        }
+
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            startLocation = e.Location;
         }
     }
 
